@@ -31,7 +31,8 @@ script.
 
 ## Exploring the SECOND hooks
 
-1. Change into the `second` directory:
+1
+. Change into the `second` directory:
    ```bash
    cd second
    ```
@@ -43,7 +44,10 @@ script.
    attention top‑k masking and contrastive mixing functions to dummy
    data and print the results. To integrate these hooks with a real
    vision‑language model you will need to adapt the `run_second`
-   function to the API of that model.
+
+   function to
+
+    the API of that model.
 
 ## Grok‑1 example
 
@@ -59,7 +63,21 @@ repository and install its dependencies.
 - The baseline model provided here is intentionally small and
   educational. It cannot replace a full LLaVA model. However, its
   simplicity makes it easy to understand and extend.
-- The SECOND hooks require PyTorch. If you wish to run
+
   `run_second_demo.py`, install PyTorch in your environment.
 - The Grok example is included for completeness but is not executable
   without the rest of the Grok codebase. Treat it as a template.
+
+
+## Combining LLaVA and SECOND
+
+At present the code in this repository does not implement a working integration between the Mini‑LLaVA baseline and the SECOND hooks. The baseline in `baseline_llava` is a pure NumPy mini‑Transformer for demonstration purposes, whereas the SECOND hooks in `second/second_hooks.py` are implemented in PyTorch and expect to operate on PyTorch tensors from a real LLaVA model. As a result, there is no out‑of‑the‑box way to run SECOND on top of the baseline model. When we attempted to run the SECOND demo script in this environment it failed with a missing PyTorch dependency.
+
+To use SECOND with a proper LLaVA model you need to:
+
+1. Install a PyTorch version of LLaVA and ensure you have an up‑to‑date vision‑language model checkpoint (e.g. LLaVA 1.5 or LLaVA‑NeXT).
+2. Install PyTorch in your environment. The demo scripts here will not run without it.
+3. Use the helper functions in `second/second_hooks.py` within the forward pass of your LLaVA model. After encoding an image with the vision tower, apply positional embedding interpolation if the stage resolution differs from the ViT’s training grid; use `topk_mask_from_attn` on the attention map to select the most relevant visual tokens; and use `contrastive_mix` to blend logits from multiple scales.
+own model’s API.
+
+Until these steps are carried out, the baseline and SECOND remain separate demonstrations rather than an integrated pipeline.
